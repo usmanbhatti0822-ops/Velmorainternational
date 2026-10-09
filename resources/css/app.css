@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Velmora design tokens (provisional until logo is final) — see docs/05-design-system.md */
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+
+    --color-forest: #14503A;
+    --color-deep: #0C3526;
+    --color-sage: #E3EEE7;
+    --color-gold: #C8A04A;
+    --color-antique: #A9822F;
+    --color-cream: #FAF7F0;
+    --color-charcoal: #1F2A26;
+    --color-stone: #5E6B65;
+    --color-mist: #DDE3DF;
+    --color-leather: #7A4B2A;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+html { scroll-behavior: smooth; }
+body { min-width: 320px; }
+[x-cloak] { display: none !important; }
+::selection { color: #fff; background: #14503A; }
+.container-wide { width: min(100% - 2.5rem, 80rem); margin-inline: auto; }
+.eyebrow { color: #A9822F; font-size: .75rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.section-space { padding-block: clamp(4rem, 8vw, 7.5rem); }
+.focus-ring:focus-visible { outline: 3px solid #C8A04A; outline-offset: 3px; }
+:lang(ar) { font-family: 'Cairo', Tahoma, sans-serif; }
+
+.premium-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+}
+
+.reveal-up { animation: reveal-up .75s cubic-bezier(.2,.75,.25,1) both; }
+.reveal-delay { animation-delay: .14s; }
+.reveal-delay-more { animation-delay: .26s; }
+.chat-panel-enter { transform-origin: bottom right; animation: chat-pop .28s cubic-bezier(.2,.8,.25,1) both; }
+.chat-launcher-pulse { animation: chat-pulse 2.4s ease-in-out infinite; }
+.chat-dot-pulse { animation: chat-dot 1.8s ease-in-out infinite; }
+.admin-sidebar-link { transition: background-color .18s ease, color .18s ease, transform .18s ease; }
+.admin-sidebar-link:hover { transform: translateX(3px); }
+
+@keyframes reveal-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chat-pop {
+    from { opacity: 0; transform: translateY(14px) scale(.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes chat-pulse {
+    0%, 100% { box-shadow: 0 12px 30px rgba(12, 53, 38, .2), 0 0 0 0 rgba(200, 160, 74, .22); }
+    50% { box-shadow: 0 16px 38px rgba(12, 53, 38, .28), 0 0 0 9px rgba(200, 160, 74, 0); }
+}
+
+@keyframes chat-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(129, 205, 151, .55); }
+    50% { box-shadow: 0 0 0 5px rgba(129, 205, 151, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-up, .chat-panel-enter, .chat-launcher-pulse, .chat-dot-pulse { animation: none !important; }
+}
