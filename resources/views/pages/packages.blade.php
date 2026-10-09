@@ -15,7 +15,7 @@
                 <p class="mt-3 leading-7 text-stone">{{ $package->localized('description') }}</p>
                 <p class="mt-4 text-sm font-semibold leading-6 text-antique">{{ $package->localized('audience') }}</p>
                 <p class="mt-5 border-t border-mist pt-4 text-xs leading-5 text-stone">{{ $package->localized('min_qty_note') }}</p>
-                <dialog class="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl border border-mist bg-white p-0 text-charcoal shadow-2xl backdrop:bg-deep/60 backdrop:backdrop:blur-sm" aria-labelledby="package-dialog-title-{{ $package->id }}">
+                <dialog class="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl border border-mist bg-white p-0 text-charcoal shadow-2xl backdrop:bg-deep/60 backdrop:blur-sm" aria-labelledby="package-dialog-title-{{ $package->id }}">
                     <div class="relative isolate overflow-hidden bg-forest px-6 py-7 text-white md:px-8 md:py-8">
                         <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_0%,rgba(200,160,74,.28),transparent_42%),linear-gradient(120deg,#0C3526,#14503A)]"></div>
                         <div class="flex items-start justify-between gap-5">
