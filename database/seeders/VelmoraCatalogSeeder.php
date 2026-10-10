@@ -26,7 +26,7 @@ class VelmoraCatalogSeeder extends Seeder
         ];
 
         foreach ($divisions as $index => [$slug, $english, $arabic, $summary, $coverImage]) {
-            Division::query()->updateOrCreate(
+            Division::query()->firstOrCreate(
                 ['slug' => $slug],
                 [
                     'name' => ['en' => $english, 'ar' => $arabic],
@@ -76,7 +76,7 @@ class VelmoraCatalogSeeder extends Seeder
         $featuredByDivision = [];
 
         foreach ($demoProducts as $index => [$divisionSlug, $slug, $englishName, $arabicName, $englishSummary, $arabicSummary, $imageId]) {
-            $product = Product::query()->updateOrCreate(
+            $product = Product::query()->firstOrCreate(
                 ['slug' => $slug],
                 [
                     'division_id' => $divisionIds[$divisionSlug],
@@ -97,7 +97,7 @@ class VelmoraCatalogSeeder extends Seeder
             );
             $featuredByDivision[$divisionSlug] = true;
 
-            ProductImage::query()->updateOrCreate(
+            ProductImage::query()->firstOrCreate(
                 ['product_id' => $product->id, 'sort_order' => 0],
                 [
                     'path' => 'https://images.unsplash.com/'.$imageId.'?auto=format&fit=crop&w=1000&q=85',
@@ -159,7 +159,7 @@ class VelmoraCatalogSeeder extends Seeder
         ];
 
         foreach ($packages as $index => [$slug, $english, $arabic, $description, $audience, $audienceArabic]) {
-            SupplyPackage::query()->updateOrCreate(
+            SupplyPackage::query()->firstOrCreate(
                 ['slug' => $slug],
                 [
                     'name' => ['en' => $english, 'ar' => $arabic],
@@ -172,7 +172,7 @@ class VelmoraCatalogSeeder extends Seeder
             );
         }
 
-        Setting::query()->updateOrCreate(
+        Setting::query()->firstOrCreate(
             ['key' => 'certifications_visible'],
             ['value' => ['enabled' => false], 'group' => 'content'],
         );

@@ -25,6 +25,12 @@ php artisan serve    # terminal 2  → http://localhost:8000
 ```
 Open the folder in VS Code and accept the recommended extensions (`.vscode/extensions.json`).
 
+## Deployment
+
+The Docker image defaults to SQLite at `/data/database.sqlite`. On Railway, attach a persistent volume mounted at `/data` so products, inquiries, and admin accounts survive redeploys. The container applies migrations and additively seeds missing demo catalog entries at startup; existing product, division, package, and setting records are preserved.
+
+Create the production administrator once from the Railway service shell with `php artisan velmora:make-admin admin@velmorainternational.com`. Enter the name and password at the prompts; the command requires a password of at least 12 characters. Do not commit production credentials or put them in source code.
+
 ## Next build steps (see docs/02-prd.md roadmap)
 1. Install Filament admin: `composer require filament/filament` (check Laravel 13 compatibility first), then `php artisan filament:install --panels`
 2. Roles/permissions: `composer require spatie/laravel-permission`; translations: `spatie/laravel-translatable`
