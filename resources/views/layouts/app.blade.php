@@ -27,18 +27,18 @@
 </head>
 <body class="bg-cream font-sans text-charcoal antialiased">
     <a class="focus-ring sr-only z-50 rounded bg-white p-3 focus:not-sr-only focus:fixed focus:start-4 focus:top-4" href="#main-content">{{ __('site.skip') }}</a>
-    <header x-data="{mobileMenuOpen:false}" class="sticky top-0 z-40 border-b border-mist/80 bg-cream/95 backdrop-blur">
+    <header x-data="{mobileMenuOpen:false, scrolled:false}" @scroll.window.throttle.30ms="scrolled = window.scrollY > 12" :class="scrolled ? 'shadow-[0_12px_36px_rgba(12,53,38,.09)]' : ''" class="sticky top-0 z-40 border-b border-mist/80 bg-cream/95 backdrop-blur transition-shadow duration-300">
         <div class="container-wide flex min-h-20 items-center justify-between gap-5">
             <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" class="flex items-center gap-3" aria-label="Velmora International home">
                 <span class="grid size-11 place-items-center rounded-xl bg-forest font-display text-xl font-bold text-gold">V</span>
                 <span class="leading-tight"><span class="block font-display text-lg font-semibold tracking-[.12em] text-forest">VELMORA</span><span class="text-[.65rem] font-medium uppercase tracking-[.19em] text-stone">International</span></span>
             </a>
             <nav class="hidden items-center gap-7 text-sm font-medium text-charcoal lg:flex" aria-label="{{ __('site.primary_navigation') }}">
-                <a class="transition hover:text-antique" href="{{ route('home', ['locale' => app()->getLocale()]) }}">{{ __('site.home') }}</a>
-                <a class="transition hover:text-antique" href="{{ route('products.index', ['locale' => app()->getLocale()]) }}">{{ __('site.products') }}</a>
-                <a class="transition hover:text-antique" href="{{ route('packages', ['locale' => app()->getLocale()]) }}">{{ __('site.packages') }}</a>
-                <a class="transition hover:text-antique" href="{{ route('about', ['locale' => app()->getLocale()]) }}">{{ __('site.about') }}</a>
-                <a class="transition hover:text-antique" href="{{ route('contact', ['locale' => app()->getLocale()]) }}">{{ __('site.contact') }}</a>
+                <a class="site-nav-link transition hover:text-antique" href="{{ route('home', ['locale' => app()->getLocale()]) }}">{{ __('site.home') }}</a>
+                <a class="site-nav-link transition hover:text-antique" href="{{ route('products.index', ['locale' => app()->getLocale()]) }}">{{ __('site.products') }}</a>
+                <a class="site-nav-link transition hover:text-antique" href="{{ route('packages', ['locale' => app()->getLocale()]) }}">{{ __('site.packages') }}</a>
+                <a class="site-nav-link transition hover:text-antique" href="{{ route('about', ['locale' => app()->getLocale()]) }}">{{ __('site.about') }}</a>
+                <a class="site-nav-link transition hover:text-antique" href="{{ route('contact', ['locale' => app()->getLocale()]) }}">{{ __('site.contact') }}</a>
             </nav>
             <div class="flex items-center gap-3">
                 @php
@@ -46,7 +46,7 @@
                     $switchUrl = request()->route() ? route(request()->route()->getName(), array_merge(request()->route()->parameters(), ['locale' => $switchLocale])) : url('/'.$switchLocale);
                 @endphp
                 <a class="focus-ring rounded-full border border-mist px-3 py-2 text-xs font-semibold text-forest transition hover:bg-sage" href="{{ $switchUrl }}" lang="{{ $switchLocale }}">{{ $switchLocale === 'ar' ? 'العربية' : 'English' }}</a>
-                <a class="focus-ring hidden rounded-full bg-forest px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-deep sm:inline-flex" href="{{ route('inquiries.create', ['locale' => app()->getLocale()]) }}">{{ __('site.request_quote') }}</a>
+                <a class="button-lift focus-ring hidden rounded-full bg-forest px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-deep sm:inline-flex" href="{{ route('inquiries.create', ['locale' => app()->getLocale()]) }}">{{ __('site.request_quote') }}</a>
                 <button class="focus-ring grid size-10 place-items-center rounded-lg border border-mist text-forest lg:hidden" type="button" aria-label="{{ __('site.open_menu') }}" :aria-expanded="mobileMenuOpen.toString()" @click="mobileMenuOpen = !mobileMenuOpen" @keydown.escape.window="mobileMenuOpen = false" aria-controls="mobile-menu">☰</button>
             </div>
         </div>

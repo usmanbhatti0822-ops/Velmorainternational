@@ -1,4 +1,4 @@
-<article class="group overflow-hidden rounded-[1.4rem] border border-mist/80 bg-white shadow-[0_12px_38px_rgba(23,53,39,.055)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_55px_rgba(23,53,39,.13)]">
+<article class="scroll-reveal group overflow-hidden rounded-[1.4rem] border border-mist/80 bg-white shadow-[0_12px_38px_rgba(23,53,39,.055)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_55px_rgba(23,53,39,.13)]">
     <a class="block" href="{{ route('products.show', ['locale' => app()->getLocale(), 'product' => $product->slug]) }}">
         <div class="relative grid h-60 place-items-center overflow-hidden bg-gradient-to-br from-cream to-sage">
             @if ($product->images->first())
