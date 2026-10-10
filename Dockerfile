@@ -13,4 +13,4 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-CMD touch /data/database.sqlite && php artisan migrate --force && php -S 0.0.0.0:${PORT:-8080} -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
+CMD touch /data/database.sqlite && php artisan migrate --force && cd public && php -S 0.0.0.0:${PORT:-8080} ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
