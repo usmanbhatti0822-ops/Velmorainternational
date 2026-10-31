@@ -22,8 +22,9 @@ class PublicSiteTest extends TestCase
         $response->assertRedirect('/en');
         $this->get('/en')
             ->assertOk()
-            ->assertSee('From trusted sourcing to your next shipment.')
-            ->assertSee('Textile & Garments')
+            ->assertSee('Trade with confidence. Grow together.')
+            ->assertDontSee('sourcing')
+            ->assertSee('Apparel & Home Textiles')
             ->assertSee('Built for every buyer')
             ->assertSee('Support for businesses at every stage.')
             ->assertSee('/admin/login')
@@ -57,6 +58,46 @@ class PublicSiteTest extends TestCase
         $this->get('/en/products/sample-product')->assertNotFound();
         $product->update(['is_active' => true]);
         $this->get('/en/products/sample-product')->assertOk()->assertSee('Sample product');
+    }
+
+    public function test_trading_content_migration_refreshes_only_untouched_demo_copy(): void
+    {
+        $defaultSummary = 'Rice for importers, distributors and private-label buyers.';
+        $rice = Division::query()->create([
+            'slug' => 'rice',
+            'name' => ['en' => 'Rice', 'ar' => 'الأرز'],
+            'summary' => ['en' => $defaultSummary, 'ar' => 'تواصل معنا لتأكيد المنتجات والمواصفات المتاحة.'],
+            'description' => ['en' => $defaultSummary, 'ar' => 'تواصل معنا لتأكيد المنتجات والمواصفات المتاحة.'],
+            'is_active' => true,
+        ]);
+        $editedDivision = Division::query()->create([
+            'slug' => 'wheat',
+            'name' => ['en' => 'Wheat', 'ar' => 'القمح'],
+            'summary' => ['en' => 'Wheat and related products, supplied to confirmed specifications.', 'ar' => 'تواصل معنا لتأكيد المنتجات والمواصفات المتاحة.'],
+            'description' => ['en' => 'Admin-edited description.', 'ar' => 'تواصل معنا لتأكيد المنتجات والمواصفات المتاحة.'],
+            'is_active' => true,
+        ]);
+        $hardWheat = Product::query()->create([
+            'division_id' => $editedDivision->id,
+            'slug' => 'hard-wheat-grain',
+            'name' => ['en' => 'Hard Wheat Grain', 'ar' => 'قمح صلب'],
+            'short_description' => [
+                'en' => 'A wheat sourcing enquiry for milling and food-industry buyers.',
+                'ar' => 'استفسار توريد قمح لمطاحن ومشتري الصناعات الغذائية.',
+            ],
+            'description' => [
+                'en' => 'A wheat sourcing enquiry for milling and food-industry buyers. Illustrative demo listing. Origin, specifications, availability, pricing, packaging and order quantities are confirmed with the buyer before any offer.',
+                'ar' => 'استفسار توريد قمح لمطاحن ومشتري الصناعات الغذائية. منتج تجريبي توضيحي. يتم تأكيد المنشأ والمواصفات والتوفر والأسعار والتعبئة والكميات مع المشتري قبل تقديم أي عرض.',
+            ],
+        ]);
+
+        $migration = require database_path('migrations/2026_10_31_150504_refresh_default_division_copy_for_trading_content.php');
+        $migration->up();
+
+        $this->assertSame('Rice & Food Grains', $rice->fresh()->name['en']);
+        $this->assertSame('Admin-edited description.', $editedDivision->fresh()->description['en']);
+        $this->assertSame('Hard wheat for milling and food-industry trade enquiries.', $hardWheat->fresh()->short_description['en']);
+        $this->assertStringNotContainsString('sourcing', $hardWheat->fresh()->short_description['en']);
     }
 
     public function test_sitemap_is_valid_xml_and_contains_localized_alternates(): void

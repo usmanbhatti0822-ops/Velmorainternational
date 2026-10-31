@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Velmora International | From sourcing to shipment')
-@section('description', 'Explore Velmora International product divisions and request a tailored export quotation.')
+@section('title', 'Velmora International | Global Trading')
+@section('description', 'A Pakistan-based international trading company connecting quality products with opportunities across global markets.')
 
 @section('content')
 <section class="hero-stage relative isolate overflow-hidden bg-[#102f24] text-white">
@@ -36,7 +36,7 @@
             </div>
             <div class="hero-float reveal-up reveal-delay absolute -start-1 bottom-7 max-w-52 rounded-2xl border border-white/20 bg-[#123d2d]/90 p-4 shadow-xl backdrop-blur sm:-start-5 sm:bottom-16 sm:max-w-56">
                 <p class="text-[.65rem] uppercase tracking-[.18em] text-gold">{{ __('site.divisions_kicker') }}</p>
-                <p class="mt-2 font-display text-2xl">{{ $divisions->count() }} {{ app()->getLocale() === 'ar' ? 'فئات توريد' : 'sourcing categories' }}</p>
+                <p class="mt-2 font-display text-2xl">{{ $divisions->count() }} {{ app()->getLocale() === 'ar' ? 'فئات تجارية' : 'trade categories' }}</p>
                 <p class="mt-1 text-xs text-sage">{{ __('site.buyer_led_specs') }}</p>
             </div>
             <div class="hero-stamp absolute end-0 top-8 grid size-[5.5rem] place-items-center rounded-full border border-gold/55 bg-[#102f24]/75 text-center text-[.55rem] font-semibold uppercase leading-4 tracking-[.12em] text-gold shadow-xl backdrop-blur sm:end-2 sm:top-4 sm:size-[6.5rem]"><span>Velmora<br>International<br><span class="text-white/75">Trade</span></span></div>
