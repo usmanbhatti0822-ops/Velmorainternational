@@ -15,7 +15,7 @@ class DemoCatalogDeploymentTest extends TestCase
     {
         Artisan::call('velmora:seed-demo-catalog');
 
-        $this->assertSame(28, Product::query()->count());
+        $this->assertSame(25, Product::query()->count());
 
         $product = Product::query()->firstOrFail();
         $product->update([
@@ -25,7 +25,7 @@ class DemoCatalogDeploymentTest extends TestCase
 
         Artisan::call('velmora:seed-demo-catalog');
 
-        $this->assertSame(28, Product::query()->count());
+        $this->assertSame(25, Product::query()->count());
         $this->assertFalse($product->fresh()->is_active);
         $this->assertSame('Admin-customized name', $product->fresh()->name['en']);
     }

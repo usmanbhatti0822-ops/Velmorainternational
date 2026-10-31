@@ -6,6 +6,7 @@ use App\Models\Contact;
 use App\Models\Division;
 use App\Models\Inquiry;
 use App\Models\Product;
+use Database\Seeders\VelmoraCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +21,7 @@ class InquiryTest extends TestCase
     {
         Mail::fake();
         Storage::fake('local');
-        $this->seed(\Database\Seeders\VelmoraCatalogSeeder::class);
+        $this->seed(VelmoraCatalogSeeder::class);
         $division = Division::query()->firstOrFail();
         $product = Product::query()->create([
             'division_id' => $division->id,
@@ -63,5 +64,26 @@ class InquiryTest extends TestCase
 
         $this->assertSame(0, Inquiry::query()->count());
         $this->assertSame(0, Contact::query()->count());
+    }
+
+    public function test_quote_request_rejects_products_from_an_inactive_division(): void
+    {
+        $division = Division::query()->create([
+            'slug' => 'grains',
+            'name' => ['en' => 'Grains', 'ar' => 'الحبوب'],
+            'is_active' => false,
+        ]);
+        $product = Product::query()->create([
+            'division_id' => $division->id,
+            'slug' => 'chickpeas',
+            'name' => ['en' => 'Chickpeas', 'ar' => 'حمص'],
+            'is_active' => true,
+        ]);
+
+        $this->from('/en/request-a-quote')->post('/en/request-a-quote', [
+            'name' => 'Buyer',
+            'email' => 'buyer@example.com',
+            'items' => [['product_id' => $product->id]],
+        ])->assertSessionHasErrors('items.0.product_id');
     }
 }

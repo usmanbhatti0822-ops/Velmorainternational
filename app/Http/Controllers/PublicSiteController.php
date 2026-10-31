@@ -23,6 +23,7 @@ class PublicSiteController extends Controller
             'products' => Product::query()
                 ->where('is_active', true)
                 ->where('is_featured', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
                 ->with(['division', 'images'])
                 ->orderBy('sort_order')
                 ->limit(6)
@@ -50,6 +51,7 @@ class PublicSiteController extends Controller
     {
         $query = Product::query()
             ->where('is_active', true)
+            ->whereHas('division', fn ($query) => $query->where('is_active', true))
             ->with(['division', 'images'])
             ->orderBy('sort_order');
         $search = trim((string) $request->query('q'));
@@ -95,11 +97,13 @@ class PublicSiteController extends Controller
         app()->setLocale($locale);
         abort_unless($product->is_active, 404);
         $product->load(['division', 'images', 'specs', 'packagingOptions', 'supplyPackages']);
+        abort_unless($product->division->is_active, 404);
 
         return view('pages.product', [
             'product' => $product,
             'relatedProducts' => Product::query()
                 ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
                 ->where('division_id', $product->division_id)
                 ->where('id', '!=', $product->id)
                 ->with(['division', 'images'])
@@ -118,7 +122,12 @@ class PublicSiteController extends Controller
     public function catalog(): View
     {
         return view('pages.catalog', [
-            'catalogs' => Catalog::query()->where('is_active', true)->with('division')->latest()->get(),
+            'catalogs' => Catalog::query()
+                ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
+                ->with('division')
+                ->latest()
+                ->get(),
             'divisions' => Division::query()->where('is_active', true)->orderBy('sort_order')->get(),
         ]);
     }
@@ -137,7 +146,7 @@ class PublicSiteController extends Controller
     public function downloadCatalog(Request $request, string $locale, Catalog $catalog): Response
     {
         app()->setLocale($locale);
-        abort_unless($catalog->is_active, 404);
+        abort_unless($catalog->is_active && $catalog->division->is_active, 404);
 
         $validated = $request->validate([
             'email' => [$catalog->requires_email ? 'required' : 'nullable', 'email', 'max:255'],
@@ -199,6 +208,7 @@ class PublicSiteController extends Controller
         )->concat(
             Product::query()
                 ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
                 ->get()
                 ->map(fn (Product $product): array => collect($locales)
                     ->mapWithKeys(fn (string $locale): array => [

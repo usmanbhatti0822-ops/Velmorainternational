@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ChatConversation;
 use App\Models\Contact;
+use App\Models\Division;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -60,5 +62,27 @@ class ChatTest extends TestCase
         $conversation = ChatConversation::query()->where('uuid', $response->json('uuid'))->firstOrFail();
         $this->assertSame('offline', $conversation->status);
         $this->assertSame('Please contact me about samples.', $conversation->messages()->firstOrFail()->body);
+    }
+
+    public function test_chat_cannot_start_for_a_product_in_an_inactive_division(): void
+    {
+        $division = Division::query()->create([
+            'slug' => 'grains',
+            'name' => ['en' => 'Grains', 'ar' => 'الحبوب'],
+            'is_active' => false,
+        ]);
+        $product = Product::query()->create([
+            'division_id' => $division->id,
+            'slug' => 'chickpeas',
+            'name' => ['en' => 'Chickpeas', 'ar' => 'حمص'],
+            'is_active' => true,
+        ]);
+
+        $this->postJson('/chat/start', [
+            'name' => 'Visitor',
+            'email' => 'visitor@example.com',
+            'product_id' => $product->id,
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('product_id');
     }
 }

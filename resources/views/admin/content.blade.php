@@ -4,9 +4,37 @@
 @section('content')
 <p class="eyebrow">Website content</p><h1 class="mt-2 font-display text-4xl text-forest">Content manager</h1>
 <div class="mt-8 space-y-8">
-    <section><h2 class="font-display text-2xl text-forest">Product divisions</h2><div class="mt-4 grid gap-4 xl:grid-cols-2">
+    <section>
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div><h2 class="font-display text-2xl text-forest">Product categories</h2><p class="mt-1 text-sm text-stone">Add, edit, hide or restore product categories. Hiding a category keeps its products and inquiry history.</p></div>
+            <a class="rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#174c37]" href="#add-category">+ Add category</a>
+        </div>
+        <form id="add-category" class="mt-5 space-y-4 rounded-2xl border border-sage/70 bg-white p-5 shadow-sm" method="post" action="{{ route('admin.divisions.store') }}" enctype="multipart/form-data">
+            @csrf
+            <h3 class="font-semibold text-forest">Add a category</h3>
+            @if ($errors->any())
+                <div role="alert" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    <p class="font-semibold">Please correct the category details and try again.</p>
+                    <ul class="mt-1 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                </div>
+            @endif
+            <div class="grid gap-3 sm:grid-cols-2">
+                <label class="text-xs font-medium">Name (English)<input class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="name_en" value="{{ old('name_en') }}" required maxlength="180"></label>
+                <label class="text-xs font-medium">Name (Arabic)<input class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="name_ar" value="{{ old('name_ar') }}" dir="rtl" maxlength="180"></label>
+                <label class="text-xs font-medium">Summary (English)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="summary_en" rows="2" maxlength="500">{{ old('summary_en') }}</textarea></label>
+                <label class="text-xs font-medium">Summary (Arabic)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="summary_ar" rows="2" dir="rtl" maxlength="500">{{ old('summary_ar') }}</textarea></label>
+                <label class="text-xs font-medium">Description (English)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="description_en" rows="2" maxlength="10000">{{ old('description_en') }}</textarea></label>
+                <label class="text-xs font-medium">Description (Arabic)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="description_ar" rows="2" dir="rtl" maxlength="10000">{{ old('description_ar') }}</textarea></label>
+                <label class="text-xs font-medium sm:col-span-2">Cover image (optional, JPG/PNG/WebP)<input class="mt-1 w-full text-sm" type="file" name="cover_image" accept=".jpg,.jpeg,.png,.webp"></label>
+            </div>
+            <input type="hidden" name="is_active" value="0">
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" value="1" checked>Show category on website</label>
+            <button class="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#174c37]">Add category</button>
+        </form>
+        <div class="mt-5 grid gap-4 xl:grid-cols-2">
         @foreach($divisions as $division)
-            <form class="space-y-3 rounded-2xl border border-mist bg-white p-5" method="post" action="{{ route('admin.divisions.update',$division) }}" enctype="multipart/form-data">@csrf @method('PATCH')
+            <div class="rounded-2xl border border-mist bg-white p-5">
+            <form class="space-y-3" method="post" action="{{ route('admin.divisions.update',$division) }}" enctype="multipart/form-data">@csrf @method('PATCH')
                 <div class="flex items-center justify-between gap-3"><h3 class="font-semibold">{{ $division->slug }}</h3><span class="text-xs text-stone">/{{ app()->getLocale() }}/divisions/{{ $division->slug }}</span></div>
                 <div class="grid gap-3 sm:grid-cols-2"><label class="text-xs font-medium">Name (English)<input class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="name_en" value="{{ old('name_en',$division->localized('name','en')) }}" required></label><label class="text-xs font-medium">Name (Arabic)<input class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="name_ar" value="{{ old('name_ar',$division->localized('name','ar')) }}" dir="rtl"></label>
                 <label class="text-xs font-medium">Summary (English)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="summary_en" rows="2">{{ old('summary_en',$division->localized('summary','en')) }}</textarea></label><label class="text-xs font-medium">Summary (Arabic)<textarea class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" name="summary_ar" rows="2" dir="rtl">{{ old('summary_ar',$division->localized('summary','ar')) }}</textarea></label>
@@ -14,8 +42,15 @@
                 <label class="text-xs font-medium">Sort order<input class="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm" type="number" min="0" name="sort_order" value="{{ $division->sort_order }}" required></label><label class="text-xs font-medium">Cover image (JPG/PNG/WebP)<input class="mt-1 w-full text-sm" type="file" name="cover_image" accept=".jpg,.jpeg,.png,.webp"></label></div>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" value="1" @checked($division->is_active)>Visible on website</label><button class="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-white">Save division</button>
             </form>
+            <form class="mt-3 border-t border-mist pt-3" method="post" action="{{ route('admin.divisions.visibility', $division) }}" onsubmit="return confirm('{{ $division->is_active ? 'Remove this category from the website? Its products and history will be kept.' : 'Restore this category to the website?' }}')">
+                @csrf @method('PATCH')
+                <input type="hidden" name="is_active" value="{{ $division->is_active ? 0 : 1 }}">
+                <button class="rounded-full border px-4 py-2 text-sm font-semibold {{ $division->is_active ? 'border-red-200 text-red-700 hover:bg-red-50' : 'border-green-200 text-green-800 hover:bg-green-50' }}">{{ $division->is_active ? 'Remove category' : 'Restore category' }}</button>
+            </form>
+            </div>
         @endforeach
-    </div></section>
+        </div>
+    </section>
     <section><h2 class="font-display text-2xl text-forest">Supply packages</h2><div class="mt-4 grid gap-4 xl:grid-cols-2">
         @foreach($packages as $package)
             <form class="space-y-3 rounded-2xl border border-mist bg-white p-5" method="post" action="{{ route('admin.supply-packages.update',$package) }}">@csrf @method('PATCH')

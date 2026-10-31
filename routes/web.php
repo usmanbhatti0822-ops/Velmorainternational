@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\PublicSiteController;
+use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/en');
 
@@ -62,7 +62,9 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/products/{product}', [AdminController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{product}', [AdminController::class, 'deleteProduct'])->name('products.delete');
     Route::get('/content', [AdminController::class, 'content'])->name('content');
+    Route::post('/divisions', [AdminController::class, 'storeDivision'])->name('divisions.store');
     Route::patch('/divisions/{division}', [AdminController::class, 'updateDivision'])->name('divisions.update');
+    Route::patch('/divisions/{division}/visibility', [AdminController::class, 'updateDivisionVisibility'])->name('divisions.visibility');
     Route::patch('/supply-packages/{package}', [AdminController::class, 'updateSupplyPackage'])->name('supply-packages.update');
     Route::post('/packaging-options', [AdminController::class, 'storePackagingOption'])->name('packaging-options.store');
     Route::post('/catalogs', [AdminController::class, 'storeCatalog'])->name('catalogs.store');

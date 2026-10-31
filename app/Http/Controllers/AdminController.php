@@ -15,7 +15,9 @@ use App\Models\SupplyPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminController extends Controller
@@ -28,7 +30,10 @@ class AdminController extends Controller
             'newInquiries' => Inquiry::query()->where('status', 'new')->count(),
             'openConversations' => ChatConversation::query()->whereIn('status', ['waiting', 'active', 'offline'])->count(),
             'unreadMessages' => ChatConversation::query()->sum('unread_agent_count'),
-            'productsCount' => Product::query()->where('is_active', true)->count(),
+            'productsCount' => Product::query()
+                ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
+                ->count(),
             'recentInquiries' => Inquiry::query()->with('contact')->latest()->limit(6)->get(),
             'recentConversations' => ChatConversation::query()->with('contact')->latest('last_message_at')->limit(6)->get(),
         ]);
@@ -257,6 +262,59 @@ class AdminController extends Controller
         ]);
 
         return back()->with('status', 'Division updated.');
+    }
+
+    public function storeDivision(Request $request): RedirectResponse
+    {
+        $this->authorizeRoles($request, ['super_admin', 'content_manager']);
+        $validated = $request->validate([
+            'name_en' => ['required', 'string', 'max:180'],
+            'name_ar' => ['nullable', 'string', 'max:180'],
+            'summary_en' => ['nullable', 'string', 'max:500'],
+            'summary_ar' => ['nullable', 'string', 'max:500'],
+            'description_en' => ['nullable', 'string', 'max:10000'],
+            'description_ar' => ['nullable', 'string', 'max:10000'],
+            'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+        $slug = Str::slug($validated['name_en']);
+
+        if ($slug === '') {
+            throw ValidationException::withMessages(['name_en' => 'The English category name must contain letters or numbers.']);
+        }
+
+        if (Division::query()->where('slug', $slug)->exists()) {
+            throw ValidationException::withMessages(['name_en' => 'A category with this English name already exists.']);
+        }
+
+        $imagePath = $request->file('cover_image')?->store('divisions', 'public');
+
+        if ($request->hasFile('cover_image') && $imagePath === false) {
+            throw new \RuntimeException('The category image could not be stored.');
+        }
+
+        Division::query()->create([
+            'slug' => $slug,
+            'name' => ['en' => $validated['name_en'], 'ar' => $validated['name_ar'] ?? $validated['name_en']],
+            'summary' => ['en' => $validated['summary_en'] ?? '', 'ar' => $validated['summary_ar'] ?? $validated['summary_en'] ?? ''],
+            'description' => ['en' => $validated['description_en'] ?? '', 'ar' => $validated['description_ar'] ?? $validated['description_en'] ?? ''],
+            'cover_image' => $imagePath,
+            'sort_order' => (int) Division::query()->max('sort_order') + 1,
+            'is_active' => (bool) ($validated['is_active'] ?? false),
+        ]);
+
+        return back()->with('status', 'Category added.');
+    }
+
+    public function updateDivisionVisibility(Request $request, Division $division): RedirectResponse
+    {
+        $this->authorizeRoles($request, ['super_admin', 'content_manager']);
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+        $division->update(['is_active' => $validated['is_active']]);
+
+        return back()->with('status', $validated['is_active'] ? 'Category restored.' : 'Category removed from the website.');
     }
 
     public function updateSupplyPackage(Request $request, SupplyPackage $package)

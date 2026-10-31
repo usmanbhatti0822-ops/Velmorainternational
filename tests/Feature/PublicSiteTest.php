@@ -25,6 +25,10 @@ class PublicSiteTest extends TestCase
             ->assertSee('Trade with confidence. Grow together.')
             ->assertDontSee('sourcing')
             ->assertSee('Apparel & Home Textiles')
+            ->assertDontSee('Maize &amp; Other Grains')
+            ->assertDontSee('Chickpeas')
+            ->assertDontSee('Red Lentils')
+            ->assertDontSee('Yellow Corn')
             ->assertSee('Built for every buyer')
             ->assertSee('Support for businesses at every stage.')
             ->assertSee('/admin/login')
@@ -42,6 +46,20 @@ class PublicSiteTest extends TestCase
             ->assertSee('حلول لكل مشترٍ')
             ->assertSee('دعم للأعمال في جميع مراحلها.')
             ->assertDontSee('site.flexible_supply');
+    }
+
+    public function test_grains_division_and_products_are_not_listed_or_accessible(): void
+    {
+        $this->seed(VelmoraCatalogSeeder::class);
+
+        $this->get('/en/products')
+            ->assertOk()
+            ->assertDontSee('Chickpeas')
+            ->assertDontSee('Red Lentils')
+            ->assertDontSee('Yellow Corn');
+
+        $this->get('/en/divisions/grains')->assertNotFound();
+        $this->get('/en/products/chickpeas')->assertNotFound();
     }
 
     public function test_only_published_products_are_accessible(): void
@@ -98,6 +116,33 @@ class PublicSiteTest extends TestCase
         $this->assertSame('Admin-edited description.', $editedDivision->fresh()->description['en']);
         $this->assertSame('Hard wheat for milling and food-industry trade enquiries.', $hardWheat->fresh()->short_description['en']);
         $this->assertStringNotContainsString('sourcing', $hardWheat->fresh()->short_description['en']);
+    }
+
+    public function test_grains_migration_hides_an_existing_division_without_deleting_its_content(): void
+    {
+        $division = Division::query()->create([
+            'slug' => 'grains',
+            'name' => ['en' => 'Grains', 'ar' => 'الحبوب'],
+            'summary' => ['en' => 'Old grains category', 'ar' => 'فئة الحبوب'],
+            'is_active' => true,
+        ]);
+        $product = Product::query()->create([
+            'division_id' => $division->id,
+            'slug' => 'chickpeas',
+            'name' => ['en' => 'Chickpeas', 'ar' => 'حمص'],
+            'is_active' => true,
+        ]);
+
+        $migration = require database_path('migrations/2026_10_31_153902_deactivate_grains_division.php');
+        $migration->up();
+
+        $this->assertFalse($division->fresh()->is_active);
+        $this->assertTrue($product->fresh()->is_active);
+        $this->get('/en/divisions/grains')->assertNotFound();
+        $this->get('/en/products/chickpeas')->assertNotFound();
+        $this->get('/en/products')->assertOk()->assertDontSee('Chickpeas');
+        $this->get('/en/request-a-quote')->assertOk()->assertDontSee('Chickpeas');
+        $this->get('/sitemap.xml')->assertOk()->assertDontSee('/en/products/chickpeas');
     }
 
     public function test_sitemap_is_valid_xml_and_contains_localized_alternates(): void

@@ -31,7 +31,11 @@ class ChatController extends Controller
         ]);
 
         if (! empty($validated['product_id'])) {
-            if (! Product::query()->whereKey($validated['product_id'])->where('is_active', true)->exists()) {
+            if (! Product::query()
+                ->whereKey($validated['product_id'])
+                ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
+                ->exists()) {
                 throw ValidationException::withMessages(['product_id' => 'The selected product is not available.']);
             }
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\Division;
 use App\Models\Inquiry;
 use App\Models\Product;
 use App\Models\SupplyPackage;
@@ -25,7 +26,11 @@ class InquiryController extends Controller
             : null;
 
         return view('pages.inquiries.create', [
-            'products' => Product::query()->where('is_active', true)->orderBy('name')->get(),
+            'products' => Product::query()
+                ->where('is_active', true)
+                ->whereHas('division', fn ($query) => $query->where('is_active', true))
+                ->orderBy('name')
+                ->get(),
             'prefill' => $request->query('product'),
             'packagePrefill' => $packagePrefill,
         ]);
@@ -46,7 +51,12 @@ class InquiryController extends Controller
             'delivery_timeline' => ['nullable', 'string', 'max:120'],
             'message' => ['nullable', 'string', 'max:5000'],
             'items' => ['required', 'array', 'min:1', 'max:12'],
-            'items.*.product_id' => ['nullable', Rule::exists('products', 'id')->where('is_active', true)],
+            'items.*.product_id' => [
+                'nullable',
+                Rule::exists('products', 'id')
+                    ->where('is_active', true)
+                    ->whereIn('division_id', Division::query()->where('is_active', true)->select('id')),
+            ],
             'items.*.product_name_text' => ['nullable', 'string', 'max:255'],
             'items.*.quantity' => ['nullable', 'numeric', 'min:0.001', 'max:999999999'],
             'items.*.unit' => ['nullable', 'string', 'max:32'],
